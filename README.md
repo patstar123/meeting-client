@@ -6,7 +6,7 @@ Welcome to the React H5 Client for Video Conferencing! This project aims to crea
 
 ## Project Status
 
-- **UI Development:** Completed the framework and basic functions
+- **UI Development:** Developing
 - **SDK Development:** Developing
 - **Server-Side Components:** See another project(To be uploaded soon)
 
@@ -16,6 +16,12 @@ Welcome to the React H5 Client for Video Conferencing! This project aims to crea
 - Real-time video and audio conferencing
 - Easy integration with existing SFU and backend services
 - High performance and low latency
+
+## Preview
+
+![HomePage](./preview/home_page.png)
+
+![MeetingPage](./preview/meeting_page.png)
 
 ## Installation
 

@@ -17,7 +17,7 @@ import RecStop from '../assets/icons/record-stop.svg';
 import { ReactSVG } from 'react-svg';
 
 import profileImage from '../assets/images/profile.jpg';
-import profileImage2 from '../assets/images/profile2.jpg';
+import profileImage2 from '../assets/images/profile2.jpeg';
 
 const MeetingPage = () => {
     const [showInfoModal, setShowInfoModal] = useState(false);
@@ -34,8 +34,8 @@ const MeetingPage = () => {
     const [isRecording, setIsRecording] = useState(false);
 
     const speakers = [
-        { name: "张三", imgSrc: profileImage, isSpeaking: true, isHost: true },
-        { name: "张三二", imgSrc: profileImage2, isSpeaking: true, isHost: false },
+        { name: "派大星", imgSrc: profileImage, isSpeaking: true, isHost: true },
+        { name: "张三", imgSrc: profileImage2, isSpeaking: true, isHost: false },
         { name: "张三二一", imgSrc: profileImage, isSpeaking: true, isHost: false },
         { name: "李四", imgSrc: profileImage2, isSpeaking: false, isHost: false },
         { name: "李五", imgSrc: profileImage2, isSpeaking: false, isHost: false },
@@ -240,7 +240,7 @@ const MeetingPage = () => {
                 <div className="info-modal" style={modalStyle}>
                     <div className="info-row">
                         <span className="info-label">主题</span>
-                        <span className="info-value">属亚杰的个人会议室</span>
+                        <span className="info-value">派大星的个人会议室</span>
                     </div>
                     <div className="info-row">
                         <span className="info-label">会议号</span>
@@ -257,11 +257,11 @@ const MeetingPage = () => {
                     </div>
                     <div className="info-row">
                         <span className="info-label">发起人</span>
-                        <span className="info-value">属亚杰</span>
+                        <span className="info-value">派大星</span>
                     </div>
                     <div className="info-row">
                         <span className="info-label">我的名称</span>
-                        <span className="info-value">属亚杰</span>
+                        <span className="info-value">派大星</span>
                     </div>
                     <div className="info-row">
                         <span className="info-label">参会时长</span>

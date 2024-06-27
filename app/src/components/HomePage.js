@@ -169,7 +169,7 @@ const HomePage = () => {
               </div>
             )}
             <div className="meeting-content">
-              <div className="meeting-title">属亚杰预定的会议</div>
+              <div className="meeting-title">派大星预定的会议</div>
               <div className="meeting-details">
                 <span>11:30-12:00</span>
                 <span className="separator">·</span>
