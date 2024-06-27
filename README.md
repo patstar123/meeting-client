@@ -8,7 +8,7 @@ Welcome to the React H5 Client for Video Conferencing! This project aims to crea
 
 - **UI Development:** Developing
 - **SDK Development:** Developing
-- **Server-Side Components:** See another project(To be uploaded soon)
+- **Server-Side Components:** See another [project](https://github.com/patstart/meeting-services)(In developing)
 
 ## Features
 
@@ -40,6 +40,10 @@ npm start
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or open an issue to discuss improvements or fixes.
+
+## Support
+
+You can reach me via Email or WeChat(ID: patstar123), but I might not be able to respond promptly.
 
 ## License
 
