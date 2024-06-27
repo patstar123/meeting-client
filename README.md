@@ -19,9 +19,9 @@ Welcome to the React H5 Client for Video Conferencing! This project aims to crea
 
 ## Preview
 
-![HomePage](https://github.com/patstart/meeting-client/blob/main/preview/home_page.png)
+![HomePage](preview/home_page.png)
 
-![MeetingPage](https://github.com/patstart/meeting-client/blob/main/preview/meeting_page.png)
+![MeetingPage](preview/meeting_page.png)
 
 ## Installation
 
