@@ -1,0 +1,380 @@
+/* src/styles/MeetingPage.css */
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    min-width: 700px;
+    min-height: 480px;
+}
+
+.meeting-page-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+}
+
+.meeting-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0 4px 0;
+    background-color: white;
+}
+
+.left-header,
+.right-header {
+    display: flex;
+    align-items: center;
+}
+
+.left-header {
+    margin-left: 5px;
+}
+
+.right-header {
+    margin-right: 5px;
+}
+
+.header-item {
+    display: flex;
+    align-items: center;
+    margin: 0 2px;
+    padding: 3px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: 12px;
+}
+
+.header-item:hover {
+    background-color: #a9a9a9;
+}
+
+.header-item span {
+    margin-left: 5px;
+}
+
+.border-shu {
+    border-right: 1px solid #d3d6db;
+    height: 13px;
+    margin: 0 10px;
+}
+
+.border-heng {
+    height: 1px;
+    background-color: #ebedf2;
+}
+
+.meeting-body {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.speaker-info {
+    position: absolute;
+    top: 10px;
+    font-size: 12px;
+    margin-bottom: 10px;
+    background-color: #ebf2ff;
+    padding: 7px 10px;
+    border-radius: 3px;
+    color: #4e5461;
+    min-width: 220px;
+}
+
+.icon-stack {
+    position: relative;
+    display: inline-block;
+}
+
+.member-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+}
+
+.member-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    margin-right: 20px
+}
+
+.member-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+}
+
+.member-name-container {
+    display: flex;
+    align-items: center;
+}
+
+.member-name {
+    font-size: 13px;
+}
+
+.member-mic-icon {
+    border-radius: 50%;
+
+    background-color: #006fff;
+    color: #fefeff;
+    padding: 4px;
+
+    width: 9px;
+    height: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 3px;
+}
+
+.member-mic-icon-slash {
+    color: #fa4e32; /* 设置斜杠颜色为红色 */
+    position: absolute;
+    top: 4px;
+    left: 7px;
+    width: 9px;  /* 确保宽度和高度相同 */
+    height: 9px; /* 确保宽度和高度相同 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.member-mic-icon-slash svg {
+    /* transform: rotate(90deg); */
+    width: 100%;  /* 确保宽度和高度相同 */
+    height: 100%; /* 确保宽度和高度相同 */
+}
+
+.member-mic-icon-slash svg path {
+    fill: #fa4e32; /* 修改图标颜色 */
+    stroke: #fa4e32;
+    stroke-width: 50;
+}
+
+.host-icon-container {
+    position: absolute;
+    bottom: 5px;
+    left: 32px;
+
+    display: inline-block;
+    background-color: #ff8019; /* 背景颜色 */
+    border-radius: 50%; /* 圆形 */
+    width: 15px;
+    height: 15px;
+}
+
+.host-icon {
+    color: white; /* 图标颜色 */
+    font-size: 10px; /* 图标大小 */
+    margin-bottom: 2px;
+}
+
+.meeting-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    background-color: #fff;
+    align-items: center;
+}
+
+.left-controls,
+.center-controls {
+    display: flex;
+    gap: 20px;
+}
+
+.footer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 5px 1px 5px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.footer-item:hover {
+    background-color: #a9a9a9;
+}
+
+.footer-item span {
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.self-icon-stack {
+    position: relative;
+    height: 21px;
+    width: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.self-icon {
+    color: #4e5461;
+    font-size: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.self-icon-slash {
+    position: absolute;
+    top: 4px;
+    left: 0px;
+    width: 15px;  /* 确保宽度和高度相同 */
+    height: 15px; /* 确保宽度和高度相同 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.self-icon-slash svg {
+    /* transform: rotate(-10deg); */
+    width: 100%;  /* 确保宽度和高度相同 */
+    height: 100%; /* 确保宽度和高度相同 */
+}
+
+.self-icon-slash svg path {
+    fill: #fa4e32; /* 修改图标颜色 */
+    stroke: #fa4e32;
+    stroke-width: 50;
+}
+
+.self-icon-slash.self-mic {
+    width: 17px;
+    height: 17px;
+    /* top: 6px; */
+    left: 1px;
+}
+
+.self-icon.self-camera {
+    height: 24px;
+}
+
+.self-icon-slash.self-camera {
+    width: 17px;
+    height: 17px;
+    /* top: 6px; */
+    left: -3px;
+}
+
+.self-icon.self-screen {
+    height: 23px;
+}
+
+.self-icon.self-shield {
+    height: 20px;
+}
+
+.self-icon.self-user {
+    height: 20px;
+}
+
+.self-icon.self-mgr {
+    height: 22px;
+}
+
+.self-icon.self-chat {
+    height: 28px;
+}
+
+.self-icon.self-rec-start {
+    height: 23px;
+}
+
+.self-icon.self-rec-stop {
+    height: 20px;
+}
+
+.end-meeting-button {
+    background-color: #fff;
+    border: 1px solid #ff4d4f;
+    color: #ff4d4f;
+    padding: 5px 13px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 3px;
+}
+
+.end-meeting-button:hover {
+    background-color: #ff4d4f;
+    color: #fff;
+}
+
+.tooltip,
+.network-tooltip {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #d3d6db;
+    border-radius: 4px;
+    padding: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    z-index: 1000;
+}
+
+.info-modal {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #d3d6db;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+
+    font-size: 12px;
+    width: 320px;
+    padding: 10px 20px 10px 20px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.info-label {
+    color: #7B818F;
+    /* 灰色字体 */
+    flex: 1;
+    text-align: left;
+}
+
+.info-value {
+    flex: 4;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.icon-space {
+    margin-left: 5px;
+    margin-right: 5px;
+    color: #4e5461;
+}
+
+.num-space {
+    margin-right: 10px;
+}
+
+.border-shu {
+    border-right: 1px solid #d3d6db;
+    height: 13px;
+    margin: 0 5px;
+}

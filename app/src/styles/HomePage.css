@@ -1,0 +1,267 @@
+/* src/styles/HomePage.css */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  min-width: 700px;
+  min-height: 480px;
+}
+
+.meeting-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  margin-right: 14%;
+}
+
+.profile-pic {
+  width: 35px;
+  height: 35px;
+  background-color: #ccc;
+  background-image: url(../assets/images/profile.jpg);
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+.sidebar {
+  width: 65px;
+  background-color: #f5f6f7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 38px 0 0 0;
+}
+
+.sidebar-item {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 5px;
+}
+
+.sidebar-item .icon {
+  font-size: 20px;
+  color: #8d929a;
+}
+
+.sidebar-item:hover .icon {
+  color: #a9a9a9;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  padding: 20px;
+}
+
+.left-content {
+  flex: 1;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  background-color: #fff;
+  max-width: 1100px;
+  margin-right: 10%;
+}
+
+.border-right {
+  border-right: 1px solid #f5f6f8;
+}
+
+.right-content {
+  flex: 1;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  background-color: #fff;
+  margin-left: 10%;
+}
+
+.meeting-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px 35px;
+  justify-items: center;
+  width: 100%;
+  max-width: 300px;
+}
+
+.meeting-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.icon-button {
+  width: 75px;
+  height: 75px;
+  background-color: #007bff;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+}
+
+.action-text {
+  margin-top: 10px;
+  color: #000;
+  font-size: 14px;
+  position: relative;
+}
+
+.date {
+  margin-bottom: 10px;
+}
+
+.main-date {
+  font-size: 29px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.sub-date-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sub-date {
+  font-size: 12px;
+  /* color: #888; */
+}
+
+.history-button {
+  background-color: #F5F6F7;
+  border: none;
+  color: #4E5461;
+  cursor: pointer;
+  font-size: 12px;
+  /* padding: 5px 10px; */
+}
+
+.history-button:hover,
+.history-button:focus {
+  background-color: #E6E8EB;
+}
+
+.date-separator {
+  height: 1px;
+  background-color: #f5f6f8;
+  margin: 10px 0;
+}
+
+.join-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.join-button:hover {
+  background-color: #0056b3;
+}
+
+.dropdown-toggle {
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 25px;
+  left: 0;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+
+.meeting-schedule {
+  background-color: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 550px;
+  min-width: 350px;
+}
+
+.meeting-date {
+  color: #7B818F;
+  user-select: none;
+  pointer-events: none;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.meeting-item {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-top: 7px;
+  transition: background-color 0.3s ease;
+  border-radius: 5px;
+}
+
+.meeting-item.hovered {
+  background-color: #F5F6F7;
+}
+
+.meeting-actions2 {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meeting-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.meeting-title {
+  font-size: 14px;
+  /* font-weight: bold; */
+  margin-bottom: 5px;
+}
+
+.meeting-details {
+  font-size: 13px;
+  color: #7B818F;
+}
+
+.meeting-details .separator {
+  margin: 0 5px;
+}
