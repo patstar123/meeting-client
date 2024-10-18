@@ -27,6 +27,7 @@ body,
   background-position: center;
   border-radius: 50%;
   margin-bottom: 20px;
+  cursor: pointer;
 }
 
 .sidebar {
@@ -200,6 +201,7 @@ body,
 .dropdown-item {
   padding: 8px 12px;
   cursor: pointer;
+  width: max-content;
 }
 
 .dropdown-item:hover {
@@ -264,4 +266,12 @@ body,
 
 .meeting-details .separator {
   margin: 0 5px;
+}
+
+.left-button {
+  font-size: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
 }

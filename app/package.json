@@ -1,7 +1,8 @@
 {
-  "name": "meeting-app2",
+  "name": "meeting-app",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

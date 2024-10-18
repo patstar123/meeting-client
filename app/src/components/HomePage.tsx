@@ -1,9 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'
 import '../styles/HomePage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faBolt, faCalendarCheck, faDesktop, faGear, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { faMountain } from '@fortawesome/free-solid-svg-icons'; // 新图标
 import Modal from './Modal'; // 引入Modal组件
+import { useCookies } from 'react-cookie'; // 使用 react-cookie 操作 cookie
+import { message } from 'antd'
+import { NoticeType } from 'antd/es/message/interface'
+import { useStore } from '../store'
+import HomeCamera from '../assets/icons/home-camera.svg';
+import HomeBolt from '../assets/icons/home-bolt.svg';
+import HomeMeeting from '../assets/icons/home-meeting.svg';
+import HomeAdd from '../assets/icons/home-add.svg';
+import HomeCalendar from '../assets/icons/home-calendar.svg';
+import HomeCheck from '../assets/icons/home-check.svg';
+import HomePencil from '../assets/icons/home-pencil.svg';
+import HomeBook from '../assets/icons/home-book.svg';
+
+import {
+  ClientId,
+  ClientIdType,
+  UnspecifiedClientId,
+  MCSRoomPermission,
+  CreateRoomParams,
+  ClientInitParams,
+  SFUClient,
+  RoomType,
+  hasMicrophonePermission,
+  hasCameraPermission,
+  ExtRole,
+} from 'sfu-sdk'
 
 const HomePage = () => {
   const [hoveredButton, setHoveredButton] = useState(null);
@@ -11,6 +38,20 @@ const HomePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [quickMeetingDropdown, setQuickMeetingDropdown] = useState(false);
+  const [tryFastMeeting, setTryFastMeeting] = useState(false);
+
+  const [cookies, setCookie] = useCookies(['meeting_username']); // 读取和设置 cookies
+  const [userInfo, setUserInfo] = useState(null); // 当前用户信息
+
+  // 状态管理
+  const { sfuClientStore, meetingPermissionSetStore } = useStore()
+
+  const [messageApi, contextHolder] = message.useMessage()
+  const messageTip = (tip: string, type: NoticeType = 'error') =>
+    messageApi.open({
+      type: type,
+      content: tip,
+    })
 
   const handleMouseEnter = (buttonName) => {
     setHoveredButton(buttonName);
@@ -33,15 +74,25 @@ const HomePage = () => {
     setModalOpen(true);
   };
 
-  const closeModal = () => {
+  const closeModal = (canceled: boolean = true) => {
     setModalOpen(false);
     setModalContent(null);
+    if (canceled) setTryFastMeeting(false)
   };
+
+  const navigate = useNavigate()
 
   const handleIconClick = (action) => {
     switch (action) {
       case 'quickMeeting':
-        window.location.href = '/start-meeting'; // 假设开会的新页面URL为'/start-meeting'
+        if (!userInfo || !userInfo.username) {
+          setTryFastMeeting(true)
+          openModal('addUserInfo');
+          return
+        }
+
+        setTryFastMeeting(false);
+        fastMeeting()
         break;
       case 'joinMeeting':
         openModal('joinMeeting');
@@ -57,10 +108,104 @@ const HomePage = () => {
     }
   };
 
+  // 提交用户信息，保存到 cookie 并关闭模态框
+  const handleSaveUserInfo = (userData) => {
+    setCookie('meeting_username', userData, { path: '/', maxAge: 3600 * 24 * 7 }); // 保存 cookie，设置有效期为7天
+    setUserInfo(userData); // 设置当前用户信息
+    closeModal(false);
+  };
+
+  // 快速会议
+  const fastMeeting = async () => {
+    if (!userInfo.username) {
+      messageTip('用户名不能为空')
+      return
+    }
+
+    const granted1 = await hasMicrophonePermission()
+    const granted2 = await hasCameraPermission()
+    if (!granted1) {
+      messageTip('用户拒绝了[麦克风]的权限,请手动授权')
+      return
+    }
+    if (!granted2) {
+      messageTip('用户拒绝了[相机]的权限,请手动授权')
+      return
+    }
+
+    const mcsUrl = window.location.origin
+    const roomName = userInfo.username + "的个人会议"
+    const areaId = ""
+    const adaptiveStream = false
+    const videoSimulcast = true
+
+    sfuClientStore.setMcsUrl(mcsUrl)
+    sfuClientStore.sfuClient.setClientAreaId(areaId)
+    sfuClientStore.sfuClient.setAdaptiveStream(adaptiveStream)
+    if (sfuClientStore.sfuClient.isTsbox() && videoSimulcast) {
+      console.warn("TSBOX强制禁用多播")
+      sfuClientStore.sfuClient.setVideoSimulcast(false)
+    } else {
+      sfuClientStore.sfuClient.setVideoSimulcast(videoSimulcast)
+    }
+
+    const permission = new MCSRoomPermission(
+      meetingPermissionSetStore.allowMemRename,
+      meetingPermissionSetStore.allowMemOpenCam,
+      meetingPermissionSetStore.allowMemOpenMic,
+      meetingPermissionSetStore.allowMemShareScreen,
+      meetingPermissionSetStore.micOpen,
+      meetingPermissionSetStore.camOpen,
+      -1,
+      1,
+    )
+
+    const createRoomParams = new CreateRoomParams(
+      userInfo.username,
+      roomName,
+      RoomType.Normal,
+      100,
+      "",
+      permission,
+      60,
+    )
+
+    console.debug("CreateRoomParams", createRoomParams)
+
+    sfuClientStore.setCreateRoomParams(createRoomParams, '', false)
+    sfuClientStore.sfuClient.setExtRole(ExtRole.Normal)
+
+    //通过identityType区分调取createRoom还是joinRoom
+    const params: { [key: string]: string } = {
+      identityType: "1"
+    }
+    navigate({
+      pathname: '/start-meeting',
+      search: '?' + new URLSearchParams(params).toString(),
+    })
+  }
+
+  // 页面加载时检查是否已有用户信息
+  useEffect(() => {
+    if (cookies.meeting_username) {
+      setUserInfo(cookies.meeting_username); // 如果 cookie 中存在用户信息，使用它
+      messageTip("当前用户名: " + cookies.meeting_username.username, 'info')
+    } else {
+      openModal('addUserInfo');
+    }
+  }, [cookies.meeting_username]);
+
+  useEffect(() => {
+    if (userInfo && userInfo.username && tryFastMeeting) {
+      handleIconClick("quickMeeting")
+    }
+  }, [userInfo]);
+
   return (
     <div className="meeting-container">
+      {contextHolder}
       <div className="sidebar">
-        <div className="profile-pic"></div>
+        <div className="profile-pic" onClick={() => openModal('addUserInfo')}></div>
         <div className="sidebar-bottom">
           <div className="sidebar-item">
             <FontAwesomeIcon icon={faGear} className="icon" />
@@ -76,7 +221,9 @@ const HomePage = () => {
             onClick={() => handleIconClick('joinMeeting')}
           >
             <div className="icon-button">
-              <FontAwesomeIcon icon={hoveredButton === 'join' ? faMountain : faPlus} size="2x" />
+              {hoveredButton === 'join' ?
+                (<img src={HomeMeeting} className="left-button" style={{ height: '35px' }} />) :
+                (<img src={HomeAdd} className="left-button" style={{ height: '35px' }} />)}
             </div>
             <span className="action-text">加入会议</span>
           </div>
@@ -86,7 +233,9 @@ const HomePage = () => {
             onMouseLeave={handleMouseLeave}
           >
             <div className="icon-button" onClick={() => handleIconClick('quickMeeting')}>
-              <FontAwesomeIcon icon={hoveredButton === 'quick' ? faMountain : faBolt} size="2x" />
+              {hoveredButton === 'quick' ?
+                (<img src={HomeCamera} className="left-button" style={{ height: '35px' }} />) :
+                (<img src={HomeBolt} className="left-button" style={{ height: '60px' }} />)}
             </div>
             <span className="action-text">
               快速会议
@@ -107,7 +256,9 @@ const HomePage = () => {
             onClick={() => handleIconClick('scheduleMeeting')}
           >
             <div className="icon-button">
-              <FontAwesomeIcon icon={hoveredButton === 'schedule' ? faMountain : faCalendarCheck} size="2x" />
+              {hoveredButton === 'schedule' ?
+                (<img src={HomeCalendar} className="left-button" style={{ height: '35px' }} />) :
+                (<img src={HomeCheck} className="left-button" style={{ height: '45px' }} />)}
             </div>
             <span className="action-text">预定会议</span>
           </div>
@@ -118,7 +269,9 @@ const HomePage = () => {
             onClick={() => handleIconClick('addMeeting')}
           >
             <div className="icon-button">
-              <FontAwesomeIcon icon={hoveredButton === 'share' ? faMountain : faDesktop} size="2x" />
+              {hoveredButton === 'share' ?
+                (<img src={HomeBook} className="left-button" style={{ height: '37px' }} />) :
+                (<img src={HomePencil} className="left-button" style={{ height: '45px' }} />)}
             </div>
             <span className="action-text">添加会议</span>
           </div>
@@ -179,7 +332,8 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      {modalOpen && <Modal content={modalContent} onClose={closeModal} />}
+
+      {modalOpen && <Modal content={modalContent} onClose={closeModal} handleSaveUserInfo={handleSaveUserInfo} />}
     </div>
   );
 };

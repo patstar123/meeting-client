@@ -43,7 +43,7 @@ Contributions are welcome! Please submit a pull request or open an issue to disc
 
 ## Support
 
-You can reach me via Email or WeChat(ID: patstar123), but I might not be able to respond promptly.
+You can reach me via Email or WeChat(ID: **patstar123**), but I might not be able to respond promptly.
 
 ## License
 
