@@ -1,0 +1,112 @@
+.icon-stack {
+  position: relative;
+  display: inline-block;
+}
+
+.voice-member-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 20px; /* 可调整卡片之间的间距 */
+  max-width: 70%; /* 可根据需要设置最大宽度 */
+  margin: 0 auto;
+}
+
+.voice-member-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 10px;
+}
+
+.voice-member-item.speaking::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid #00CC66;
+  pointer-events: none;
+}
+
+.voice-member-item img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 5px;
+}
+
+.voice-member-name-container {
+  display: flex;
+  align-items: center;
+}
+
+.voice-member-name-container.empty {
+  visibility: hidden;
+}
+
+.voice-member-name {
+  font-size: 13px;
+}
+
+.voice-member-mic-icon {
+  border-radius: 50%;
+
+  background-color: #006fff;
+  color: #fefeff;
+  padding: 4px;
+
+  width: 9px;
+  height: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 3px;
+}
+
+.voice-member-mic-icon-slash {
+  color: #fa4e32; /* 设置斜杠颜色为红色 */
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  width: 9px;  /* 确保宽度和高度相同 */
+  height: 9px; /* 确保宽度和高度相同 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.voice-member-mic-icon-slash svg {
+  /* transform: rotate(90deg); */
+  width: 100%;  /* 确保宽度和高度相同 */
+  height: 100%; /* 确保宽度和高度相同 */
+}
+
+.voice-member-mic-icon-slash svg path {
+  fill: #fa4e32; /* 修改图标颜色 */
+  stroke: #fa4e32;
+  stroke-width: 50;
+}
+
+.voice-member-host-icon-container {
+  position: absolute;
+  bottom: 5px;
+  left: 32px;
+
+  display: inline-block;
+  background-color: #ff8019; /* 背景颜色 */
+  border-radius: 50%; /* 圆形 */
+  width: 15px;
+  height: 15px;
+}
+
+.voice-member-host-icon {
+  color: white; /* 图标颜色 */
+  font-size: 10px; /* 图标大小 */
+  margin-bottom: 2px;
+}

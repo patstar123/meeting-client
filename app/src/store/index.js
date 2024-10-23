@@ -1,7 +1,6 @@
 // 组合子模块
 // 封装统一导出 供业务使用的方法
 import { MeetingStateSetStore } from './meetingStateSet.Store'
-import { MeetingPermissionSetStore } from './meetingPermission.Store'
 import { SfuClientStore } from './sfuClient.Store'
 import { SfuMemberStore } from './sfuMember.Store'
 import { LAVDDStore } from './lavdd.Store'
@@ -16,7 +15,6 @@ class RootStore {
     // 根store有个属性 是sfuApiStore
     // 对应的值 就是导入的子模块实例对象
     this.meetingStateSetStore = new MeetingStateSetStore()
-    this.meetingPermissionSetStore = new MeetingPermissionSetStore()
     this.sfuClientStore = new SfuClientStore()
     this.sfuMemberStore = new SfuMemberStore()
     this.lavddStore = new LAVDDStore()

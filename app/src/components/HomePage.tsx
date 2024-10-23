@@ -4,7 +4,7 @@ import '../styles/HomePage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faBolt, faCalendarCheck, faDesktop, faGear, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { faMountain } from '@fortawesome/free-solid-svg-icons'; // 新图标
-import Modal from './Modal'; // 引入Modal组件
+import HomeModal from './HomeModal'; // 引入Modal组件
 import { useCookies } from 'react-cookie'; // 使用 react-cookie 操作 cookie
 import { message } from 'antd'
 import { NoticeType } from 'antd/es/message/interface'
@@ -33,18 +33,16 @@ import {
 } from 'sfu-sdk'
 
 const HomePage = () => {
+  // 状态管理
   const [hoveredButton, setHoveredButton] = useState(null);
   const [hoveredMeeting, setHoveredMeeting] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [quickMeetingDropdown, setQuickMeetingDropdown] = useState(false);
   const [tryFastMeeting, setTryFastMeeting] = useState(false);
-
-  const [cookies, setCookie] = useCookies(['meeting_username']); // 读取和设置 cookies
+  const [cookies, setCookie] = useCookies(['meeting_user']); // 读取和设置 cookies
   const [userInfo, setUserInfo] = useState(null); // 当前用户信息
-
-  // 状态管理
-  const { sfuClientStore, meetingPermissionSetStore } = useStore()
+  const { sfuClientStore } = useStore()
 
   const [messageApi, contextHolder] = message.useMessage()
   const messageTip = (tip: string, type: NoticeType = 'error') =>
@@ -110,7 +108,7 @@ const HomePage = () => {
 
   // 提交用户信息，保存到 cookie 并关闭模态框
   const handleSaveUserInfo = (userData) => {
-    setCookie('meeting_username', userData, { path: '/', maxAge: 3600 * 24 * 7 }); // 保存 cookie，设置有效期为7天
+    setCookie('meeting_user', userData, { path: '/', maxAge: 3600 * 24 * 7 }); // 保存 cookie，设置有效期为7天
     setUserInfo(userData); // 设置当前用户信息
     closeModal(false);
   };
@@ -133,67 +131,33 @@ const HomePage = () => {
       return
     }
 
-    const mcsUrl = window.location.origin
-    const roomName = userInfo.username + "的个人会议"
-    const areaId = ""
-    const adaptiveStream = false
-    const videoSimulcast = true
+    sfuClientStore.mcsUrl = window.location.origin
+    sfuClientStore.roomName = userInfo.username + "的快速会议"
+    sfuClientStore.clientName = userInfo.username
+    sfuClientStore.roomNum = undefined
+    sfuClientStore.autoOpenCamera = false
+    sfuClientStore.autoOpenMic = false
+    sfuClientStore.password = ''
 
-    sfuClientStore.setMcsUrl(mcsUrl)
-    sfuClientStore.sfuClient.setClientAreaId(areaId)
-    sfuClientStore.sfuClient.setAdaptiveStream(adaptiveStream)
-    if (sfuClientStore.sfuClient.isTsbox() && videoSimulcast) {
-      console.warn("TSBOX强制禁用多播")
-      sfuClientStore.sfuClient.setVideoSimulcast(false)
-    } else {
-      sfuClientStore.sfuClient.setVideoSimulcast(videoSimulcast)
-    }
-
-    const permission = new MCSRoomPermission(
-      meetingPermissionSetStore.allowMemRename,
-      meetingPermissionSetStore.allowMemOpenCam,
-      meetingPermissionSetStore.allowMemOpenMic,
-      meetingPermissionSetStore.allowMemShareScreen,
-      meetingPermissionSetStore.micOpen,
-      meetingPermissionSetStore.camOpen,
-      -1,
-      1,
-    )
-
-    const createRoomParams = new CreateRoomParams(
-      userInfo.username,
-      roomName,
-      RoomType.Normal,
-      100,
-      "",
-      permission,
-      60,
-    )
-
-    console.debug("CreateRoomParams", createRoomParams)
-
-    sfuClientStore.setCreateRoomParams(createRoomParams, '', false)
-    sfuClientStore.sfuClient.setExtRole(ExtRole.Normal)
-
-    //通过identityType区分调取createRoom还是joinRoom
-    const params: { [key: string]: string } = {
-      identityType: "1"
-    }
     navigate({
       pathname: '/start-meeting',
-      search: '?' + new URLSearchParams(params).toString(),
+      search: '?' + new URLSearchParams({
+        action: "fast" // 表示为快速会议(创建并加入会议)
+      }).toString(),
     })
   }
 
   // 页面加载时检查是否已有用户信息
   useEffect(() => {
-    if (cookies.meeting_username) {
-      setUserInfo(cookies.meeting_username); // 如果 cookie 中存在用户信息，使用它
-      messageTip("当前用户名: " + cookies.meeting_username.username, 'info')
+    if (cookies.meeting_user) {
+      if (cookies.meeting_user?.username !== userInfo?.username) {
+        setUserInfo(cookies.meeting_user); // 如果 cookie 中存在用户信息，使用它
+        messageTip("当前用户名: " + cookies.meeting_user.username, 'info')
+      }
     } else {
       openModal('addUserInfo');
     }
-  }, [cookies.meeting_username]);
+  }, [cookies.meeting_user]);
 
   useEffect(() => {
     if (userInfo && userInfo.username && tryFastMeeting) {
@@ -333,7 +297,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {modalOpen && <Modal content={modalContent} onClose={closeModal} handleSaveUserInfo={handleSaveUserInfo} />}
+      {modalOpen && <HomeModal content={modalContent} onClose={closeModal} handleSaveUserInfo={handleSaveUserInfo} />}
     </div>
   );
 };

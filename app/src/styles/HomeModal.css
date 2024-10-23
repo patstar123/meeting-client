@@ -1,0 +1,199 @@
+/* src/styles/HomeModal.css */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 29px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.modal-content.joinMeeting {
+    width: 319px;
+    height: 550px;
+}
+
+.modal-title {
+    position: absolute;
+    top: 10px;
+    left: 42%;
+    font-size: 14px;
+    color: #4e5461;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.modal-main {
+    position: relative;
+    top: 30px;
+}
+
+.modal-sub-title {
+    margin-bottom: 10px;
+}
+
+.line-label {
+    font-size: 16px;
+}
+
+.line-input {
+    margin: 10px 0;
+}
+
+.line-option {
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.line-option-checkbox {
+    margin: 0px 5px 0px 0px;
+}
+
+.line-option-label {
+    font-size: 13px;
+}
+
+.dropdown-input-container {
+    position: 'relative';
+    display: 'inline-block';
+    margin: 10px 0;
+}
+
+.name-input {
+    width: 40%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.name-ok {
+    width: 20%;
+    padding: 10px;
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.joining-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 200px;
+}
+
+.joining-button:hover {
+    background-color: #0055e8;
+}
+
+.joining-button.disabled,
+.joining-button.disabled:hover {
+    background-color: #b2d1ff;
+    cursor: auto;
+}
+
+.password-title {
+    font-weight: bold;
+}
+
+.password-modal {
+    position: fixed;
+    /* 固定定位在视窗内 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* 居中显示 */
+    background-color: #fff;
+    /* 背景颜色为白色 */
+    border-radius: 8px;
+    /* 边框圆角 */
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    /* 阴影效果 */
+    z-index: 1001;
+    /* 确保在其他内容上方 */
+    padding: 20px;
+    /* 增加内边距 */
+    max-width: 400px;
+    /* 限制最大宽度 */
+    width: 360px;
+    height: 140px;
+}
+
+.password-input {
+    padding: 0 10px 3px 10px;
+    margin: 12px 0 10px 0;
+    font-weight: bolder;
+    font-size: 25px;
+    height: 32px;
+}
+
+.password-input::placeholder {
+    font-size: 13px;
+    /* 设置 placeholder 的字体大小 */
+    color: #999;
+    /* 也可以设置颜色 */
+    font-weight: normal;
+}
+
+.password-label {
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+.button-container {
+    display: flex;
+    /* 使用 flex 布局 */
+    justify-content: flex-end;
+    /* 让按钮靠右对齐 */
+    gap: 10px;
+    /* 设置按钮之间的间距 */
+    margin-top: 20px;
+    /* 给按钮区域增加上方的间距 */
+}
+
+.password-joining-button {
+    width: 89px;
+}
+
+.password-joining-button.ok {
+    background-color: #0066ff;
+    color: white;
+}
+
+.password-joining-button.ok:hover {
+    background-color: #0055e8;
+}
+
+.password-joining-button.disabled,
+.password-joining-button.disabled:hover {
+    background-color: #b2d1ff;
+    cursor: auto;
+}
