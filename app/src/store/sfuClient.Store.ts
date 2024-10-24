@@ -39,7 +39,7 @@ class SfuClientStore {
   password: string = undefined // 会议密码
 
   /////////////////////// 建会属性
-  roomName: string = 'Unknown' // 会议名称
+  roomName: string = undefined // 会议名称
   maxMembers: number = 100 // 最大会议人数
   emptyTimeoutSec: number = 60 // 会议室空置回收超时时间
   durationSeconds: number = 3600 // 会议持续时长(秒)
@@ -65,7 +65,7 @@ class SfuClientStore {
     this.messageTip = messageTip
   }
 
-  initCommSfuClient = (client: SFUClient) => {
+  initCommSfuClient = (client?: SFUClient) => {
     const params = new ClientInitParams(
       this.mcsUrl,
       this.clientId,
@@ -79,6 +79,7 @@ class SfuClientStore {
     params.enableVideoOriginSize = this.enableVideoOriginSize
     params.extRole = ExtRole.Normal
 
+    if (!client) client = new SFUClient()
     client.init(params, {})
 
     client.setNetAddressTransformer({
@@ -91,6 +92,8 @@ class SfuClientStore {
         return { changed: false, dropped: false }
       },
     })
+
+    return client
   }
 
   getCommCreateRoomParams = (): CreateRoomParams => {

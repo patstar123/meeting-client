@@ -79,6 +79,7 @@ body,
   background-color: #fff;
   max-width: 1100px;
   margin-right: 10%;
+  margin-bottom: 10%;
 }
 
 .border-right {
@@ -92,6 +93,7 @@ body,
   align-items: center;
   background-color: #fff;
   margin-left: 10%;
+  margin-bottom: 10%;
 }
 
 .meeting-actions {

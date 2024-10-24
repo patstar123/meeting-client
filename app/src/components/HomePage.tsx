@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import '../styles/HomePage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faBolt, faCalendarCheck, faDesktop, faGear, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -31,6 +31,7 @@ import {
   hasCameraPermission,
   ExtRole,
 } from 'sfu-sdk'
+import { genRoomInviteByCurrentUrl, getRoomInviteFromCurrentUrl } from './common';
 
 const HomePage = () => {
   // 状态管理
@@ -43,13 +44,23 @@ const HomePage = () => {
   const [cookies, setCookie] = useCookies(['meeting_user']); // 读取和设置 cookies
   const [userInfo, setUserInfo] = useState(null); // 当前用户信息
   const { sfuClientStore } = useStore()
+  const [joinObj, setJoinObj] = useState<{roomNum: string, password: string}>(undefined)
 
   const [messageApi, contextHolder] = message.useMessage()
-  const messageTip = (tip: string, type: NoticeType = 'error') =>
+  const messageTip = (tip: string, type: NoticeType = 'error') => {
     messageApi.open({
       type: type,
       content: tip,
     })
+  }
+
+  useEffect(() => {
+    const inviteMsg = getRoomInviteFromCurrentUrl()
+    if (!inviteMsg) return
+
+    setJoinObj(inviteMsg)
+    handleIconClick('joinMeeting')
+  }, []);
 
   const handleMouseEnter = (buttonName) => {
     setHoveredButton(buttonName);
@@ -297,7 +308,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {modalOpen && <HomeModal content={modalContent} onClose={closeModal} handleSaveUserInfo={handleSaveUserInfo} />}
+      {modalOpen && <HomeModal content={modalContent} joinObj={joinObj} onClose={closeModal} handleSaveUserInfo={handleSaveUserInfo} />}
     </div>
   );
 };

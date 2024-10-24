@@ -6,16 +6,20 @@ import { DownOutlined } from '@ant-design/icons';
 import { useCookies } from 'react-cookie';
 import { NoticeType } from 'antd/es/message/interface';
 import '../styles/HomeModal.css';
-import { SFUClient, hasCameraPermission, hasMicrophonePermission } from 'sfu-sdk';
+import { RoomInfo, SFUClient, hasCameraPermission, hasMicrophonePermission } from 'sfu-sdk';
 import { useStore } from 'store';
 import { useNavigate } from 'react-router-dom';
+import { formatMeetingId, getRoomTimeDesc } from './common';
 
-const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
+const HomeModal = ({ content, joinObj, onClose, handleSaveUserInfo }) => {
   const [title, setTitle] = useState('');
   const [username, setUsername] = useState('');
   const [cookies, setCookie] = useCookies(['meeting_passwords', 'meeting_user']); // 使用 react-cookie 操作 cookie
 
+  const [meetingName, setMeetingName] = useState('');
+  const [meetingTime, setMeetingTime] = useState('');
   const [meetingId, setMeetingId] = useState(''); // 会议号状态
+  const [meetingId_, setMeetingId_] = useState(''); // 会议号状态(带-)
   const [showVideo, setShowVideo] = useState(false);
   const [openVoice, setOpenVoice] = useState(false);
   const [isPasswordRequired, setIsPasswordRequired] = useState(false); // 是否需要密码
@@ -54,8 +58,7 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
   const checkMeetingPassword = async () => {
     let requirePassword = false
     if (true) {
-      const client = new SFUClient()
-      sfuClientStore.initCommSfuClient(client)
+      const client = sfuClientStore.initCommSfuClient()
       const res = await client.roomPasswordAuthentication(meetingId, "")
       requirePassword = res.code !== 0
     } else {
@@ -117,36 +120,30 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
     }
 
     // 如果选择了记住密码，将其保存到 cookie 中，24 小时后过期
-    if (rememberPassword) {
-      setCookie('meeting_passwords', { ...cookies.meeting_passwords, [meetingId]: meetingPassword }, { path: '/', maxAge: 86400 });
-    }
+    if (rememberPassword) savePassword()
 
     joinRoom()
   };
+
+  const savePassword = () => {
+    setCookie('meeting_passwords', { ...cookies.meeting_passwords, [meetingId]: meetingPassword }, { path: '/', maxAge: 86400 });
+  }
 
   const handleMeetingIdInput = (e) => {
     onMeetingIdChanged(e.target.value)
   };
 
-  const formatMeetingId = (id) => {
-    let value = id.replace(/\D/g, ''); // 只保留数字
-    if (value.length > 9) {
-      value = value.slice(0, 9); // 限制为最多9位数字
-    }
-    if (value.length > 4) {
-      value = `${value.slice(0, 4)}-${value.slice(4)}`; // 插入分隔符 "-"
-    }
-    return value
-  }
-
   const onMeetingIdChanged = (id) => {
-    id = formatMeetingId(id)
+    const id_ = formatMeetingId(id)
 
-    setMeetingId(id);
+    setMeetingId_(id_)
+    setMeetingId(id_.replace('-', ''));
+    setMeetingName('')
+    setMeetingTime('')
 
     // 检查是否符合格式: 4位数字-5位数字
     const regex = /^\d{4}-\d{5}$/;
-    setJoinable(regex.test(id))
+    setJoinable(regex.test(id_))
   }
 
   const handleClearAllRecords = () => {
@@ -182,9 +179,38 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
 
   useEffect(() => {
     if (content === 'joinMeeting') setTitle('加入会议')
-    else if (content === 'scheduleMeeting') setTitle('预约会议')
-    else if (content === 'addMeeting') setTitle('添加会议')
+    else if (content === 'scheduleMeeting') setTitle('预约会议(开发中)')
+    else if (content === 'addMeeting') setTitle('添加会议(开发中)')
     else if (content === 'addUserInfo') setTitle('入会名称')
+
+    if (joinObj?.roomNum) onMeetingIdChanged(joinObj.roomNum)
+    if (joinObj?.password) {
+      setMeetingPassword(joinObj?.password)
+      setRememberPassword(true)
+      savePassword()
+    }
+
+    if (joinObj?.roomNum) {
+      const client = sfuClientStore.initCommSfuClient()
+      client.getRoomsPeerByIdsAndNum('', joinObj?.roomNum).then(res => {
+        if (res.code !== 0) {
+          messageTip(res.msg + ', 可能会议已结束')
+          setJoinable(false)
+          return
+        }
+
+        const info: RoomInfo = res.data
+        if (info.state === 2 || info.state === 3) {
+          messageTip("该会议已经结束,无法加入")
+          setJoinable(false)
+          return
+        }
+
+        const time = getRoomTimeDesc(info.scheduledStartTime, info.scheduledEndTime, info.scheduledDurationSeconds)
+        setMeetingName(info.roomName)
+        setMeetingTime(time)
+      })
+    }
 
     // document.addEventListener('click', handleOutsideClick);
     // return () => {
@@ -226,11 +252,13 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
         <div className='modal-main'>
           {content === 'joinMeeting' && (
             <div>
+              {meetingName && (<><label className='line-label' style={{ display: "block" }}>{meetingName}</label><br /></>)}
+              {meetingTime && (<><label className='line-label' style={{ display: "block" }}>{meetingTime}</label><br /></>)}
               <div>
                 <label className='line-label'>会议号</label><br />
                 <div className='dropdown-input-container'>
                   <Input
-                    value={meetingId}
+                    value={meetingId_}
                     onChange={handleMeetingIdInput}
                     placeholder="请输入会议号"
                     suffix={
@@ -249,8 +277,8 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
                     <div style={{ left: 0, width: '100%', }} />
                   </Dropdown>
                 </div>
-
               </div>
+
               <div>
                 <label className='line-label'>您的名称</label><br />
                 <Input className='line-input'
@@ -287,8 +315,8 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
                 onClick={checkMeetingPassword}>加入会议</button>
             </div>
           )}
-          {content === 'scheduleMeeting' && <div>预约会议参数配置(开发中)</div>}
-          {content === 'addMeeting' && <div>添加会议参数配置(开发中)</div>}
+          {content === 'scheduleMeeting' && <div></div>}
+          {content === 'addMeeting' && <div></div>}
           {content === 'addUserInfo' &&
             <div>
               <input className='name-input'
@@ -297,7 +325,6 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="请输入您的名称"
               />
-              &nbsp;&nbsp;
               <button className='name-ok' onClick={handleSave}>确认</button>
               <br /><br />
             </div>
@@ -324,11 +351,11 @@ const HomeModal = ({ content, onClose, handleSaveUserInfo }) => {
               <label className='password-label'>此账号下次入会无需重复输入密码</label>
             </div>
             <div className="button-container">
-            <Button className='password-joining-button' onClick={() => {
-              setMeetingPassword('')
-              setIsPasswordRequired(false)
-            }}>取消</Button>
-            <Button className={`password-joining-button ok ${meetingPassword.length > 0 ? '' : 'disabled'}`} disabled={meetingPassword.length === 0} onClick={handleSubmitPassword}>加入</Button>
+              <Button className='password-joining-button' onClick={() => {
+                setMeetingPassword('')
+                setIsPasswordRequired(false)
+              }}>取消</Button>
+              <Button className={`password-joining-button ok ${meetingPassword.length > 0 ? '' : 'disabled'}`} disabled={meetingPassword.length === 0} onClick={handleSubmitPassword}>加入</Button>
             </div>
           </div>
         )}

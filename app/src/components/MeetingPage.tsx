@@ -35,16 +35,19 @@ import {
     MCSLivekitEncodingOptions, MCSEgressLayoutParams,
     MCSEgressOutputParams, MCSEgressOutputType,
     SFUClientCallback, EgressStatus, EgressState,
-    RtspVcState, TxVideoConfigs, ClientInitParams, UnspecifiedClientId, genClientIdBySFUId, JoinInfo, ConnectionQuality,
+    RtspVcState, TxVideoConfigs, ClientInitParams, UnspecifiedClientId, genClientIdBySFUId, JoinInfo, ConnectionQuality, SFUResult,
 } from 'sfu-sdk'
 import VoiceMembersGrid from './MemberShowVoiceOnly';
-import { MemberItem } from './common';
+import { MemberItem, formatMeetingId, genRoomInviteByCurrentUrl, getRoomTimeDesc, goHome } from './common';
 import MemberAudioPlayGrid, { MemberAudio } from './MemberPlayAudio';
+import Password from 'antd/es/input/Password';
 
 const MeetingPage = () => {
     // 状态管理
-    const [sfuClient, setSfuClient] = useState(new SFUClient());
+    const [action, _1] = useState(new URLSearchParams(useLocation().search).get('action')) // 入会方式
+    const [sfuClient, _2] = useState(new SFUClient());
     const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
     const [showSecurityTooltip, setShowSecurityTooltip] = useState(false);
     const [showNetworkTooltip, setShowNetworkTooltip] = useState(false);
     const securityIconRef = useRef(null);
@@ -85,24 +88,12 @@ const MeetingPage = () => {
         // { sfuId: "27", name: "李一二三四3", imgSrc: undefined, isHost: false, isLowHost: false, isMicrophoneEnabled: false, isSpeaking: false, isCameraEnabled: false, isScreenShareEnabled: false, empty: false, isSelf: false },
     ]);
 
-    const [index, setIndex] = useState(0);
-    const doTestNext = () => {
-        setIndex(index + 1)
-        const selected = members[Math.floor(index / 2) % members.length]
-        setMembers((prevMembers) => {
-            if (!prevMembers) return [];
-            return prevMembers.map((member) =>
-                selected && member.sfuId === selected.sfuId ?
-                    {
-                        ...member,
-                        isSpeaking: !member.isSpeaking,
-                    } : member
-            );
-        });
-    }
-
-    // 获取入会方式
-    const action = new URLSearchParams(useLocation().search).get('action');
+    const [roomNum, setRoomNum] = useState('')
+    const [roomNum_, setRoomNum_] = useState(''); // 会议号状态(带-)
+    const [roomName, setRoomName] = useState('')
+    const [roomPassword, setRoomPassword] = useState('')
+    const [roomTimeDesc, setRoomTimeDesc] = useState('')
+    const [roomUrl, setRoomUrl] = useState('')
 
     // 初始化页面操作
     useEffect(() => {
@@ -110,7 +101,6 @@ const MeetingPage = () => {
         sfuClientStore.setMessageTip(messageTip)
 
         document.addEventListener('click', handleClickOutside);
-
         return () => {
             document.removeEventListener('click', handleClickOutside);
         };
@@ -124,13 +114,25 @@ const MeetingPage = () => {
         // 设置客户端回调
         sfuClient.setSFUClientCallback({})
 
-        if (action === "fast") { // 创建会议并加入
+        if (!action) {
+            onJoined('empty action', new SFUResult(-1, "页面状态异常,请勿直接访问当前页面,须从会议入口访问"), undefined)
+        } else if (action === "fast") { // 创建会议并加入
+            if (!sfuClientStore.roomName) {
+                onJoined('createRoom', new SFUResult(-1, "页面状态异常,请勿刷新或直接访问当前页面,须从会议入口访问"), undefined)
+                return
+            }
+
             const params = sfuClientStore.getCommCreateRoomParams()
             console.debug("CreateRoomParams", params)
 
             sfuClient.createRoom(params, roomCallback, sfuClientStore.maxResolution, sfuClientStore.fixedResolution)
                 .then((res) => onJoined("createRoom", res, undefined))
         } else if (action === "join") { // 加入会议
+            if (!sfuClientStore.roomNum) {
+                onJoined('joinRoom', new SFUResult(-1, "页面状态异常,请勿刷新或直接访问当前页面,须从会议入口访问"), undefined)
+                return
+            }
+
             const params = sfuClientStore.getCommJoinRoomParams()
             console.debug("JoinRoomParams", params)
 
@@ -148,8 +150,32 @@ const MeetingPage = () => {
             setIsHost(info.isHost || (layout && layout === "host"))
             sfuClientStore.clientId = info.clientId
             saveMeetingRecord(info.roomName, info.roomNum)
+
+            const id_ = formatMeetingId(info.roomNum)
+            const roomUrl = genRoomInviteByCurrentUrl(info.roomNum, sfuClientStore.password)
+            const time = getRoomTimeDesc(info.roomInfo.scheduledStartTime, info.roomInfo.scheduledEndTime, info.roomInfo.scheduledDurationSeconds)
+
+            setRoomNum(info.roomNum)
+            setRoomNum_(id_)
+            setRoomName(info.roomName)
+            setRoomTimeDesc(time)
+            setRoomPassword(sfuClientStore.password)
+            setRoomUrl(roomUrl)
         } else {
             messageTip(res.msg)
+            setTimeout(() => {
+                countDownLeave(3)
+            }, 1000);
+        }
+    }
+
+    const countDownLeave = (left) => {
+        if (left > 0) {
+            messageTip(left + '秒后将退出该页面')
+            left--
+            setTimeout(() => countDownLeave(left), 1000);
+        } else {
+            onLeave()
         }
     }
 
@@ -407,6 +433,15 @@ const MeetingPage = () => {
         setIsEndingMeeting(false);
     };
 
+    const handlerShowInviteModal = () => {
+        if (!roomUrl) {
+            messageTip("加入会议失败,无法获取会议信息")
+            return
+        }
+
+        setShowInviteModal(true)
+    }
+
     // 修改会议权限
     const handleUpdateRoomPermission = async (tag: string) => {
         if (tag === 'allowMemOpenCam') {
@@ -447,12 +482,10 @@ const MeetingPage = () => {
         if (message) {
             messageTip("即将退出：" + message)
             setTimeout(function () {
-                navigate('/')
-                window.location.reload();
+                goHome(navigate, process.env.PUBLIC_URL)
             }, 3000);
         } else {
-            navigate('/')
-            window.location.reload();
+            goHome(navigate, process.env.PUBLIC_URL)
         }
     }
     const updateMember = (updatedMember: MemberInfo) => {
@@ -496,6 +529,28 @@ const MeetingPage = () => {
 
         localStorage.setItem('recentMeetingRecords', JSON.stringify(updatedMeetingRecords));
     };
+    const copyRoomInviteInfo2Clipboard = () => {
+        navigator.clipboard.writeText(`${sfuClientStore.clientName} 邀请您参加在线会议
+会议主题：${roomName}
+会议时间：${roomTimeDesc}
+
+点击链接直接加入会议：
+${roomUrl}
+
+输入会议号入会：
+#在线会议：${roomNum_}
+${roomPassword && '会议密码：' + roomPassword}`)
+        messageTip("会议邀请已复制到剪贴板", 'info')
+    }
+    const copyRoomNum2Clipboard = () => {
+        navigator.clipboard.writeText(`${sfuClientStore.clientName} 邀请您加入 ${roomName}
+点击链接直接加入会议：
+${roomUrl}
+
+#在线会议：${roomNum_}
+${roomPassword && '会议密码：' + roomPassword}`)
+        messageTip("会议链接已复制到剪贴板", 'info')
+    }
 
     return (
         <div className="meeting-page-container">
@@ -585,13 +640,15 @@ const MeetingPage = () => {
                         </div>
                         <span>{hasSharedScreeen ? '共享屏幕中' : '共享屏幕'}</span>
                     </div>
-                    <div className="footer-item" onClick={doTestNext}>
-                        <div className="self-icon-stack">
-                            <FontAwesomeIcon icon={faShieldAlt} className="self-icon self-shield" />
+                    {action === 'fast' && <>
+                        <div className="footer-item">
+                            <div className="self-icon-stack">
+                                <FontAwesomeIcon icon={faShieldAlt} className="self-icon self-shield" />
+                            </div>
+                            <span>安全</span>
                         </div>
-                        <span>安全</span>
-                    </div>
-                    <div className="footer-item">
+                    </>}
+                    <div className="footer-item" onClick={() => handlerShowInviteModal()}>
                         <div className="self-icon-stack">
                             <img src={User} className="self-icon self-user" />
                         </div>
@@ -601,7 +658,7 @@ const MeetingPage = () => {
                         <div className="self-icon-stack">
                             <img src={MgrUser} className="self-icon self-mgr" />
                         </div>
-                        <span>管理成员({members.length})</span>
+                        <span>{action === 'fast' && '管理'}成员({members.length})</span>
                     </div>
                     <div className="footer-item">
                         <div className="self-icon-stack">
@@ -625,12 +682,12 @@ const MeetingPage = () => {
                     </div>
                 </div>
                 <button className="end-meeting-button" onClick={handleEndMeetingClick}>
-                    结束会议
+                    {action === 'fast' ? '结束会议' : '离开会议'}
                 </button>
                 <div className="end-meeting-overlay">
                     <div className="end-meeting-controls">
-                        <button className="end-meeting-button2" onClick={doStopMeeting}>结束会议</button>
-                        <button className="leave-meeting-button" onClick={doExitMeeting}>离开会议</button>
+                        {action === 'fast' && <button className="end-meeting-button2" onClick={doStopMeeting}>结束会议</button>}
+                        <button className={action === 'fast' ? "leave-meeting-button" : "end-meeting-button2"} onClick={doExitMeeting}>离开会议</button>
                     </div>
                 </div>
                 <button className="ending-cancel-button" onClick={handleCancelClick}>取消</button>
@@ -667,6 +724,31 @@ const MeetingPage = () => {
                         <span className="info-value">58:15</span>
                     </div>
                 </div>
+            )}
+            {showInviteModal && (
+                <Modal
+                    className='invite-modal'
+                    title={<label className='invite-modal-title'>会议号: 543 473 340</label>}
+                    open={showInviteModal}
+                    onOk={() => setShowInviteModal(false)}
+                    onCancel={() => setShowInviteModal(false)}
+                    footer={[
+                        <Button key="copyAll" onClick={() => copyRoomInviteInfo2Clipboard()}>复制全部信息</Button>,
+                        <Button key="copyIdLink" type="primary" onClick={() => copyRoomNum2Clipboard()}>复制会议号和链接</Button>,
+                    ]}
+                >
+                    <p />
+                    <p className='invite-modal-block-line'>{sfuClientStore.clientName} 邀请您参加在线会议</p>
+                    <p className='invite-modal-block-line'>会议主题：{roomName}</p>
+                    <p className='invite-modal-block-line'>会议时间：{roomTimeDesc}</p>
+                    <p />
+                    <p className='invite-modal-block-line'>点击链接直接加入会议：</p>
+                    <p className='invite-modal-block-line'>{roomUrl}</p>
+                    <p />
+                    <p className='invite-modal-block-line'>输入会议号入会：</p>
+                    <p className='invite-modal-block-line'>#在线会议：{roomNum_}</p>
+                    {roomPassword && <p className='invite-modal-block-line'>会议密码：{roomPassword}</p>}
+                </Modal>
             )}
         </div>
     );
